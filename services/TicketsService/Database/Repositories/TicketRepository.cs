@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RsoiLab2.Services.Tickets.Database.Models;
 using RsoiLab2.Services.Tickets.Database.Repositories.Interfaces;
 using Tickets.Database;
