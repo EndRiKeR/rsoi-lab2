@@ -1,20 +1,92 @@
-version: "3"
+﻿version: '3.8'
+
 services:
   postgres:
-    image: library/postgres:13
-    container_name: postgres
-    restart: on-failure
+    image: postgres:15-alpine
+    container_name: flight-booking-postgres
     environment:
+      POSTGRES_DB: flight_booking
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB: postgres
-    volumes:
-      - db-data:/var/lib/postgresql/data
-      - ./postgres/:/docker-entrypoint-initdb.d/
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - flight-booking-network
 
-# TODO добавить сервисы
+  flight-service:
+    build:
+      context: .
+      dockerfile: services/FlightService/Dockerfile
+    container_name: flight-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8060
+      - ConnectionStrings__FlightConnection=Host=postgres;Port=5432;Database=flight_booking;Username=postgres;Password=postgres
+    ports:
+      - "8060:8060"
+    depends_on:
+      - postgres
+    networks:
+      - flight-booking-network
+
+  tickets-service:
+    build:
+      context: .
+      dockerfile: services/TicketsService/Dockerfile
+    container_name: tickets-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8070
+      - ConnectionStrings__TicketsConnection=Host=postgres;Port=5432;Database=flight_booking;Username=postgres;Password=postgres
+    ports:
+      - "8070:8070"
+    depends_on:
+      - postgres
+    networks:
+      - flight-booking-network
+
+  bonus-service:
+    build:
+      context: .
+      dockerfile: services/BonusService/Dockerfile
+    container_name: bonus-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8050
+      - ConnectionStrings__LoyaltyConnection=Host=postgres;Port=5432;Database=flight_booking;Username=postgres;Password=postgres
+    ports:
+      - "8050:8050"
+    depends_on:
+      - postgres
+    networks:
+      - flight-booking-network
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: services/GatewayService/Dockerfile
+    container_name: gateway-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - FlightService__BaseUrl=http://flight-service:8060
+      - TicketsService__BaseUrl=http://tickets-service:8070
+      - BonusService__BaseUrl=http://bonus-service:8050
+    ports:
+      - "8080:8080"
+    depends_on:
+      - flight-service
+      - tickets-service
+      - bonus-service
+    networks:
+      - flight-booking-network
 
 volumes:
-  db-data:
+  postgres_data:
+
+networks:
+  flight-booking-network:
+    driver: bridge

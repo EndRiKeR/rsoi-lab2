@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RsoiLab2.Services.Tickets.Database.Models;
+﻿using FlightService.Database.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace Tickets.Database;
+namespace FlightService.Database;
 
 public class FlightContext : DbContext
 {

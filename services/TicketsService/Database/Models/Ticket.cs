@@ -1,6 +1,6 @@
-﻿using RsoiLab2.Services.Tickets.Database.Enums;
+﻿using TicketsService.Database.Enums;
 
-namespace RsoiLab2.Services.Tickets.Database.Models;
+namespace TicketsService.Database.Models;
 
 public class Ticket
 {

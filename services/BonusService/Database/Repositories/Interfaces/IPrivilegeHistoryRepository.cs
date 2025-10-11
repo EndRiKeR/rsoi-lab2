@@ -1,6 +1,11 @@
-﻿using RsoiLab2.Services.Common.Interfaces;
-using RsoiLab2.Services.Tickets.Database.Models;
+﻿using BonusService.Database.Models;
+using Common.Interfaces;
 
-namespace RsoiLab2.Services.Tickets.Database.Repositories.Interfaces;
+namespace BonusService.Database.Repositories.Interfaces;
 
-public interface IPrivilegeHistoryRepository : IRepository<PrivilegeHistory> { }
+public interface IPrivilegeHistoryRepository : IRepository<PrivilegeHistory>
+{
+    Task<List<PrivilegeHistory>> GetByPrivilegeId(long privilegeId);
+    Task<List<PrivilegeHistory>> GetByTicketUid(Guid ticketUid);
+    Task<List<PrivilegeHistory>> GetByDateRange(DateTime startDate, DateTime endDate);
+}

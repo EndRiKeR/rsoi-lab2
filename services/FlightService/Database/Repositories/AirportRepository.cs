@@ -1,104 +1,135 @@
-﻿// using Microsoft.EntityFrameworkCore;
-// using RsoiLab2.Services.Tickets.Database.Models;
-// using RsoiLab2.Services.Tickets.Database.Repositories.Interfaces;
-// using Tickets.Database;
-//
-// namespace RsoiLab2.Services.Tickets.Database.Repositories;
-//
-// public class TicketRepository : ITicketRepository
-// {
-//     private readonly TicketsContext _context;
-//     
-//     public TicketRepository(TicketsContext context)
-//     {
-//         _context = context;
-//     }
-//     
-//     public async Task<List<Ticket>> GetAll()
-//     {
-//         try
-//         {
-//             List<Ticket> tickets = await _context.Tickets.ToListAsync();
-//             
-//             return tickets;
-//         }
-//         catch (Exception e)
-//         {
-//             Console.WriteLine(e);
-//             throw;
-//         }
-//     }
-//
-//     public async Task<Ticket> GetById(long id)
-//     {
-//         try
-//         {
-//             List<Ticket> tickets = await _context.Tickets.ToListAsync();
-//             Ticket target = tickets.First(t => t.Id == id);
-//             
-//             return target;
-//         }
-//         catch (Exception e)
-//         {
-//             Console.WriteLine(e);
-//             throw;
-//         }
-//     }
-//
-//     public async Task<Ticket> Add(Ticket ticket)
-//     {
-//         try
-//         {
-//             List<Ticket> tickets = await _context.Tickets.ToListAsync();
-//             Ticket target = tickets.FirstOrDefault(t => t.Id == ticket.Id);
-//             
-//             if (target != null)
-//                 throw new Exception("Ticket already exists");
-//             
-//             var newTicket = await _context.Tickets.AddAsync(ticket);
-//             
-//             return newTicket.Entity;
-//         }
-//         catch (Exception e)
-//         {
-//             Console.WriteLine(e);
-//             throw;
-//         }
-//     }
-//
-//     public async Task<List<Ticket>> AddList(List<Ticket> addTickets)
-//     {
-//         try
-//         {
-//             List<Ticket> tickets = await _context.Tickets.ToListAsync();
-//             List<Ticket> returnTickets = new List<Ticket>();
-//
-//             foreach (var ticket in addTickets)
-//             {
-//                 Ticket target = tickets.FirstOrDefault(t => t.Id == ticket.Id);
-//             
-//                 if (target != null)
-//                     throw new Exception("Ticket already exists");
-//             
-//                 returnTickets.Add((await _context.Tickets.AddAsync(ticket)).Entity);
-//             }
-//             
-//             return returnTickets;
-//         }
-//         catch (Exception e)
-//         {
-//             Console.WriteLine(e);
-//             throw;
-//         }
-//     }
-//
-//     public async Task Delete(long id)
-//     {
-//         throw new NotImplementedException();
-//     }
-//
-//     public async Task<Ticket> Update(Ticket ticket)
-//     {
-//         throw new NotImplementedException();
-//     }
-// }
+﻿using FlightService.Database.Models;
+using FlightService.Database.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace FlightService.Database.Repositories;
+
+public class AirportRepository : IAirportRepository
+{
+    private readonly FlightContext _context;
+    
+    public AirportRepository(FlightContext context)
+    {
+        _context = context;
+    }
+    
+    public async Task<List<Airport>> GetAll()
+    {
+        try
+        {
+            return await _context.Airports.ToListAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<Airport> GetById(long id)
+    {
+        try
+        {
+            var airport = await _context.Airports.FirstOrDefaultAsync(a => a.Id == id);
+            
+            if (airport == null)
+                throw new Exception($"Airport with id {id} not found");
+            
+            return airport;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<Airport> Add(Airport airport)
+    {
+        try
+        {
+            var exists = await _context.Airports.AnyAsync(a => a.Id == airport.Id);
+            
+            if (exists)
+                throw new Exception("Airport already exists");
+            
+            var newAirport = await _context.Airports.AddAsync(airport);
+            await _context.SaveChangesAsync();
+            
+            return newAirport.Entity;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<List<Airport>> AddList(List<Airport> addAirports)
+    {
+        try
+        {
+            var existingIds = await _context.Airports
+                .Where(a => addAirports.Select(x => x.Id).Contains(a.Id))
+                .Select(a => a.Id)
+                .ToListAsync();
+
+            if (existingIds.Any())
+                throw new Exception($"Airports with ids {string.Join(", ", existingIds)} already exist");
+
+            await _context.Airports.AddRangeAsync(addAirports);
+            await _context.SaveChangesAsync();
+            
+            return addAirports;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task Delete(long id)
+    {
+        try
+        {
+            var airport = await _context.Airports.FirstOrDefaultAsync(a => a.Id == id);
+            
+            if (airport == null)
+                throw new Exception($"Airport with id {id} not found");
+            
+            _context.Airports.Remove(airport);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<Airport> Update(Airport airport)
+    {
+        try
+        {
+            var existingAirport = await _context.Airports.FirstOrDefaultAsync(a => a.Id == airport.Id);
+            
+            if (existingAirport == null)
+                throw new Exception($"Airport with id {airport.Id} not found");
+
+            // Обновляем свойства
+            existingAirport.Name = airport.Name;
+            existingAirport.City = airport.City;
+            existingAirport.Country = airport.Country;
+
+            await _context.SaveChangesAsync();
+            
+            return existingAirport;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+}

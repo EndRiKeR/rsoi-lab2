@@ -1,6 +1,6 @@
-﻿using RsoiLab2.Services.Common.Interfaces;
-using RsoiLab2.Services.Tickets.Database.Models;
+﻿using Common.Interfaces;
+using TicketsService.Database.Models;
 
-namespace RsoiLab2.Services.Tickets.Database.Repositories.Interfaces;
+namespace TicketsService.Database.Repositories.Interfaces;
 
 public interface ITicketRepository : IRepository<Ticket> { }

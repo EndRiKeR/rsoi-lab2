@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BonusService.Database.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using RsoiLab2.Services.Tickets.Database.Models;
 
-namespace Tickets.Database;
+namespace BonusService.Database;
 
 public class PrivilegeHistoryConfiguration : IEntityTypeConfiguration<PrivilegeHistory>
 {

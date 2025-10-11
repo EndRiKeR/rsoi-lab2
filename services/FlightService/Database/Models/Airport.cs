@@ -1,4 +1,4 @@
-﻿namespace RsoiLab2.Services.Tickets.Database.Models;
+﻿namespace FlightService.Database.Models;
 
 public class Airport
 {

@@ -1,4 +1,4 @@
-﻿namespace RsoiLab2.Services.Common.Interfaces;
+﻿namespace Common.Interfaces;
 
 public interface IRepository<T> where T : class
 {

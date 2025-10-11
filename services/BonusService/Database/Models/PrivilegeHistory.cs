@@ -1,4 +1,4 @@
-﻿namespace RsoiLab2.Services.Tickets.Database.Models;
+﻿namespace BonusService.Database.Models;
 
 public class PrivilegeHistory
 {

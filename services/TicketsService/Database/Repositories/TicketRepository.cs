@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RsoiLab2.Services.Tickets.Database.Models;
-using RsoiLab2.Services.Tickets.Database.Repositories.Interfaces;
-using Tickets.Database;
+using TicketsService.Database.Models;
+using TicketsService.Database.Repositories.Interfaces;
 
-namespace RsoiLab2.Services.Tickets.Database.Repositories;
+namespace TicketsService.Database.Repositories;
 
 public class TicketRepository : ITicketRepository
 {

@@ -1,6 +1,11 @@
-﻿using RsoiLab2.Services.Common.Interfaces;
-using RsoiLab2.Services.Tickets.Database.Models;
+﻿using Common.Interfaces;
+using FlightService.Database.Models;
 
-namespace RsoiLab2.Services.Tickets.Database.Repositories.Interfaces;
+namespace FlightService.Database.Repositories.Interfaces;
 
-public interface IFlightRepository : IRepository<Flight> { }
+public interface IFlightRepository : IRepository<Flight>
+{
+    Task<List<Flight>> GetFlightsByAirport(long airportId);
+    Task<List<Flight>> GetFlightsByFlightNumber(string flightNumber);
+    Task<List<Flight>> SearchFlights(long? fromAirportId, long? toAirportId, DateTime? date);
+}

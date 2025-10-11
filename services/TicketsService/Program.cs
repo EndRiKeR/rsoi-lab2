@@ -1,6 +1,9 @@
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
+builder.Services.AddHttpClient("BonusService", client =>
+{
+    client.BaseAddress = new Uri("http://bonus-service:8050");
+});
 
 app.Run();

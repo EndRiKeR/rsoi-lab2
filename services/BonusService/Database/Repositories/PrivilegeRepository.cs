@@ -1,104 +1,192 @@
-﻿// using Microsoft.EntityFrameworkCore;
-// using RsoiLab2.Services.Tickets.Database.Models;
-// using RsoiLab2.Services.Tickets.Database.Repositories.Interfaces;
-// using Tickets.Database;
-//
-// namespace RsoiLab2.Services.Tickets.Database.Repositories;
-//
-// public class TicketRepository : ITicketRepository
-// {
-//     private readonly TicketsContext _context;
-//     
-//     public TicketRepository(TicketsContext context)
-//     {
-//         _context = context;
-//     }
-//     
-//     public async Task<List<Ticket>> GetAll()
-//     {
-//         try
-//         {
-//             List<Ticket> tickets = await _context.Tickets.ToListAsync();
-//             
-//             return tickets;
-//         }
-//         catch (Exception e)
-//         {
-//             Console.WriteLine(e);
-//             throw;
-//         }
-//     }
-//
-//     public async Task<Ticket> GetById(long id)
-//     {
-//         try
-//         {
-//             List<Ticket> tickets = await _context.Tickets.ToListAsync();
-//             Ticket target = tickets.First(t => t.Id == id);
-//             
-//             return target;
-//         }
-//         catch (Exception e)
-//         {
-//             Console.WriteLine(e);
-//             throw;
-//         }
-//     }
-//
-//     public async Task<Ticket> Add(Ticket ticket)
-//     {
-//         try
-//         {
-//             List<Ticket> tickets = await _context.Tickets.ToListAsync();
-//             Ticket target = tickets.FirstOrDefault(t => t.Id == ticket.Id);
-//             
-//             if (target != null)
-//                 throw new Exception("Ticket already exists");
-//             
-//             var newTicket = await _context.Tickets.AddAsync(ticket);
-//             
-//             return newTicket.Entity;
-//         }
-//         catch (Exception e)
-//         {
-//             Console.WriteLine(e);
-//             throw;
-//         }
-//     }
-//
-//     public async Task<List<Ticket>> AddList(List<Ticket> addTickets)
-//     {
-//         try
-//         {
-//             List<Ticket> tickets = await _context.Tickets.ToListAsync();
-//             List<Ticket> returnTickets = new List<Ticket>();
-//
-//             foreach (var ticket in addTickets)
-//             {
-//                 Ticket target = tickets.FirstOrDefault(t => t.Id == ticket.Id);
-//             
-//                 if (target != null)
-//                     throw new Exception("Ticket already exists");
-//             
-//                 returnTickets.Add((await _context.Tickets.AddAsync(ticket)).Entity);
-//             }
-//             
-//             return returnTickets;
-//         }
-//         catch (Exception e)
-//         {
-//             Console.WriteLine(e);
-//             throw;
-//         }
-//     }
-//
-//     public async Task Delete(long id)
-//     {
-//         throw new NotImplementedException();
-//     }
-//
-//     public async Task<Ticket> Update(Ticket ticket)
-//     {
-//         throw new NotImplementedException();
-//     }
-// }
+﻿using BonusService.Database.Models;
+using BonusService.Database.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace BonusService.Database.Repositories;
+
+public class PrivilegeRepository : IPrivilegeRepository
+{
+    private readonly PrivilegeContext _context;
+    
+    public PrivilegeRepository(PrivilegeContext context)
+    {
+        _context = context;
+    }
+    
+    public async Task<List<Privilege>> GetAll()
+    {
+        try
+        {
+            return await _context.Privileges
+                .Include(p => p.History)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<Privilege> GetById(long id)
+    {
+        try
+        {
+            var privilege = await _context.Privileges
+                .Include(p => p.History)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            
+            if (privilege == null)
+                throw new Exception($"Privilege with id {id} not found");
+            
+            return privilege;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<Privilege> Add(Privilege privilege)
+    {
+        try
+        {
+            var exists = await _context.Privileges.AnyAsync(p => p.Id == privilege.Id);
+            
+            if (exists)
+                throw new Exception("Privilege already exists");
+            
+            var newPrivilege = await _context.Privileges.AddAsync(privilege);
+            await _context.SaveChangesAsync();
+            
+            return newPrivilege.Entity;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<List<Privilege>> AddList(List<Privilege> addPrivileges)
+    {
+        try
+        {
+            var existingIds = await _context.Privileges
+                .Where(p => addPrivileges.Select(x => x.Id).Contains(p.Id))
+                .Select(p => p.Id)
+                .ToListAsync();
+
+            if (existingIds.Any())
+                throw new Exception($"Privileges with ids {string.Join(", ", existingIds)} already exist");
+
+            await _context.Privileges.AddRangeAsync(addPrivileges);
+            await _context.SaveChangesAsync();
+            
+            return addPrivileges;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task Delete(long id)
+    {
+        try
+        {
+            var privilege = await _context.Privileges.FirstOrDefaultAsync(p => p.Id == id);
+            
+            if (privilege == null)
+                throw new Exception($"Privilege with id {id} not found");
+            
+            _context.Privileges.Remove(privilege);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<Privilege> Update(Privilege privilege)
+    {
+        try
+        {
+            var existingPrivilege = await _context.Privileges.FirstOrDefaultAsync(p => p.Id == privilege.Id);
+            
+            if (existingPrivilege == null)
+                throw new Exception($"Privilege with id {privilege.Id} not found");
+
+            // Обновляем свойства
+            existingPrivilege.Username = privilege.Username;
+            existingPrivilege.Status = privilege.Status;
+            existingPrivilege.Balance = privilege.Balance;
+
+            await _context.SaveChangesAsync();
+            
+            return existingPrivilege;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    // Дополнительные методы для работы с привилегиями
+    public async Task<Privilege> GetByUsername(string username)
+    {
+        try
+        {
+            var privilege = await _context.Privileges
+                .Include(p => p.History)
+                .FirstOrDefaultAsync(p => p.Username == username);
+            
+            if (privilege == null)
+                throw new Exception($"Privilege with username {username} not found");
+            
+            return privilege;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<bool> ExistsByUsername(string username)
+    {
+        try
+        {
+            return await _context.Privileges.AnyAsync(p => p.Username == username);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task UpdateBalance(long privilegeId, int balanceDiff)
+    {
+        try
+        {
+            var privilege = await _context.Privileges.FirstOrDefaultAsync(p => p.Id == privilegeId);
+            
+            if (privilege == null)
+                throw new Exception($"Privilege with id {privilegeId} not found");
+
+            privilege.Balance = (privilege.Balance ?? 0) + balanceDiff;
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+}

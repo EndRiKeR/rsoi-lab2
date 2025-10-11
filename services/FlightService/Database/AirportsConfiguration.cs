@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FlightService.Database.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using RsoiLab2.Services.Tickets.Database.Models;
 
-namespace Tickets.Database;
+namespace FlightService.Database;
 
 public class AirportsConfiguration : IEntityTypeConfiguration<Airport>
 {

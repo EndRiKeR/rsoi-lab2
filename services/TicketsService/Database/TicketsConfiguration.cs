@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using RsoiLab2.Services.Tickets.Database.Models;
+using TicketsService.Database.Models;
 
-namespace Tickets.Database;
+namespace TicketsService.Database;
 
 public class TicketsConfiguration : IEntityTypeConfiguration<Ticket>
 {
