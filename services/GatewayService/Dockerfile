@@ -6,14 +6,14 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["services/GatewayService/GatewayService.csproj", "services/GatewayService/"]
-RUN dotnet restore "services/GatewayService/GatewayService.csproj"
+RUN dotnet restore "services/GatewayService/GatewayService.csproj" --verbosity quiet
 COPY . .
-WORKDIR "/src/services/GatewayService"
-RUN dotnet build "GatewayService.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/services"
+RUN dotnet build "Services.sln" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "GatewayService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Services.sln" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
