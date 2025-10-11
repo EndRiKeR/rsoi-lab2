@@ -1,9 +1,23 @@
+using Common.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using TicketsService.Database;
+using TicketsService.Database.Models;
+using TicketsService.Database.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+
+builder.Services.AddTransient<IRepository<Ticket>, TicketRepository>();
+
+builder.Services.AddDbContext<TicketsContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
 var app = builder.Build();
 
-builder.Services.AddHttpClient("BonusService", client =>
-{
-    client.BaseAddress = new Uri("http://bonus-service:8050");
-});
+app.UseRouting();
+app.MapControllers();
 
 app.Run();

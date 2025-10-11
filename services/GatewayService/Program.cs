@@ -1,15 +1,6 @@
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+builder.Services.AddControllers();
 
 builder.Services.AddHttpClient("FlightService", client =>
 {
@@ -25,5 +16,10 @@ builder.Services.AddHttpClient("BonusService", client =>
 {
     client.BaseAddress = new Uri("http://localhost:8050");
 });
+
+var app = builder.Build();
+
+app.UseRouting();
+app.MapControllers();
 
 app.Run();
