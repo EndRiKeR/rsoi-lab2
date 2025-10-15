@@ -55,8 +55,6 @@ public class FlightRepository : IFlightRepository
         try
         {
             var exists = await _context.Flights
-                .Include(f => f.FromAirport)
-                .Include(f => f.ToAirport)
                 .AnyAsync(f => f.Id == flight.Id);
             
             if (exists)
