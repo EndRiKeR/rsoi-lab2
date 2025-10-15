@@ -1,22 +1,7 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+﻿FROM  mcr.microsoft.com/dotnet/sdk:8.0
 WORKDIR /app
-EXPOSE 8060
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["services/FlightService/FlightService.csproj", "services/FlightService/"]
-COPY ["services/Common/Common.csproj", "services/Common/"]
-RUN dotnet restore "services/FlightService/FlightService.csproj" --verbosity quiet
-COPY . .
-WORKDIR "/src/services"
-RUN dotnet build "Services.sln" -c $BUILD_CONFIGURATION -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "Services.sln" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
+COPY . ./FlightService
+WORKDIR /app/FlightService
+RUN dotnet publish --configuration Release --runtime linux-x64 --self-contained true --output /app
 WORKDIR /app
-COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "FlightService.dll"]
