@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TicketsService.Database.ContextConfigurations;
 using TicketsService.Database.Models;
 
 namespace TicketsService.Database;

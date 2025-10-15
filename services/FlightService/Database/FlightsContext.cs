@@ -1,4 +1,5 @@
-﻿using FlightService.Database.Models;
+﻿using FlightService.Database.ContextConfigurations;
+using FlightService.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlightService.Database;

@@ -4,6 +4,9 @@ using FlightService.Database.Models;
 using FlightService.Database.Repositories;
 using FlightService.Database.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using TicketsService.Database;
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,8 @@ builder.Services.AddDbContext<FlightContext>(options =>
 
 builder.Services.AddTransient<IAirportRepository, AirportRepository>();
 builder.Services.AddTransient<IFlightRepository, FlightRepository>();
+
+builder.Services.AddScoped<DatabaseFiller>();
 
 var app = builder.Build();
 var scope = app.Services.CreateScope();
@@ -35,8 +40,8 @@ else
     Console.WriteLine("Database is up-to-date");
 }
 
-// var initDatabaseJob = services.GetRequiredService<InitializeDatabaseJob>();
-// await initDatabaseJob.InitializeDatabaseAsync();
+var filler = services.GetRequiredService<DatabaseFiller>();
+await filler.AddTestData();
 
 if (app.Environment.IsDevelopment())
 {

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TicketsService.Database.Models;
 
-namespace TicketsService.Database;
+namespace TicketsService.Database.ContextConfigurations;
 
 public class TicketsConfiguration : IEntityTypeConfiguration<Ticket>
 {

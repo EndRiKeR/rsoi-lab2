@@ -1,4 +1,5 @@
-﻿using BonusService.Database.Models;
+﻿using BonusService.Database.ContextConfigurations;
+using BonusService.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BonusService.Database;

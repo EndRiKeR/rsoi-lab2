@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BonusService.Database;
+namespace BonusService.Database.ContextConfigurations;
 
 public class PrivilegeHistoryConfiguration : IEntityTypeConfiguration<PrivilegeHistory>
 {
