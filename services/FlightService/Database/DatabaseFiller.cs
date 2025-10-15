@@ -1,8 +1,7 @@
-﻿
-using FlightService.Database.Models;
+﻿using FlightService.Database.Models;
 using FlightService.Database.Repositories.Interfaces;
 
-namespace TicketsService.Database;
+namespace FlightService.Database;
 
 public class DatabaseFiller
 {

@@ -1,7 +1,5 @@
-using Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using TicketsService.Database;
-using TicketsService.Database.Models;
 using TicketsService.Database.Repositories;
 using TicketsService.Database.Repositories.Interfaces;
 

@@ -1,10 +1,7 @@
-using Common.Interfaces;
 using FlightService.Database;
-using FlightService.Database.Models;
 using FlightService.Database.Repositories;
 using FlightService.Database.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using TicketsService.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,8 +35,10 @@ else
     Console.WriteLine("Database is up-to-date");
 }
 
+Console.WriteLine($"[*][*][*]Before test data");
 var filler = services.GetRequiredService<DatabaseFiller>();
 await filler.AddTestData();
+Console.WriteLine($"[*][*][*]After test data");
 
 if (app.Environment.IsDevelopment())
 {

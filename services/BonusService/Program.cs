@@ -1,8 +1,6 @@
 using BonusService.Database;
-using BonusService.Database.Models;
 using BonusService.Database.Repositories;
 using BonusService.Database.Repositories.Interfaces;
-using Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
