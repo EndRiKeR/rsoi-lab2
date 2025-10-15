@@ -6,8 +6,6 @@ using FlightService.Database.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using TicketsService.Database;
 
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
