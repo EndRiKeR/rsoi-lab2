@@ -2,18 +2,26 @@
 
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:13
     container_name: flight-booking-postgres
     environment:
-      POSTGRES_DB: flight_booking
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./db-data:/var/lib/postgresql/data
+      - ./postgres/:/docker-entrypoint-initdb.d/
+      - ./postgres/scripts/:/docker-entrypoint-initdb.d/scripts/
     networks:
       - flight-booking-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d ratings" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   flight-service:
     build:
@@ -21,13 +29,13 @@ services:
       dockerfile: services/FlightService/Dockerfile
     container_name: flight-service
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8060
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=flight_booking;Username=postgres;Password=postgres
+      - ASPNETCORE_HTTP_PORTS=8060
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=flightsDb;Username=postgres;Password=postgres
     ports:
       - "8060:8060"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - flight-booking-network
 
@@ -37,13 +45,13 @@ services:
       dockerfile: services/TicketsService/Dockerfile
     container_name: tickets-service
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8070
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=flight_booking;Username=postgres;Password=postgres
+      - ASPNETCORE_HTTP_PORTS=8070
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=ticketsDb;Username=postgres;Password=postgres
     ports:
       - "8070:8070"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - flight-booking-network
 
@@ -53,13 +61,13 @@ services:
       dockerfile: services/BonusService/Dockerfile
     container_name: bonus-service
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8050
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=flight_booking;Username=postgres;Password=postgres
+      - ASPNETCORE_HTTP_PORTS=8050
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=bonusesDb;Username=postgres;Password=postgres
     ports:
       - "8050:8050"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - flight-booking-network
 
@@ -69,14 +77,12 @@ services:
       dockerfile: services/GatewayService/Dockerfile
     container_name: gateway-service
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTP_PORTS=8080
     ports:
       - "8080:8080"
     depends_on:
-      - flight-service
-      - tickets-service
-      - bonus-service
+      postgres:
+        condition: service_healthy
     networks:
       - flight-booking-network
 
