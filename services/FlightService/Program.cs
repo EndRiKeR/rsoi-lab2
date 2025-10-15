@@ -2,6 +2,7 @@ using Common.Interfaces;
 using FlightService.Database;
 using FlightService.Database.Models;
 using FlightService.Database.Repositories;
+using FlightService.Database.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,8 +16,8 @@ builder.Services.AddDbContext<FlightContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddTransient<IRepository<Airport>, AirportRepository>();
-builder.Services.AddTransient<IRepository<Flight>, FlightRepository>();
+builder.Services.AddTransient<IAirportRepository, AirportRepository>();
+builder.Services.AddTransient<IFlightRepository, FlightRepository>();
 
 var app = builder.Build();
 var scope = app.Services.CreateScope();

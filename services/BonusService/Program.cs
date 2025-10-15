@@ -1,6 +1,7 @@
 using BonusService.Database;
 using BonusService.Database.Models;
 using BonusService.Database.Repositories;
+using BonusService.Database.Repositories.Interfaces;
 using Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,8 +16,8 @@ builder.Services.AddDbContext<PrivilegeContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddTransient<IRepository<Privilege>, PrivilegeRepository>();
-builder.Services.AddTransient<IRepository<PrivilegeHistory>, PrivilegeHistoryRepository>();
+builder.Services.AddTransient<IPrivilegeRepository, PrivilegeRepository>();
+builder.Services.AddTransient<IPrivilegeHistoryRepository, PrivilegeHistoryRepository>();
 
 var app = builder.Build();
 

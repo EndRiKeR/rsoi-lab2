@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TicketsService.Database;
 using TicketsService.Database.Models;
 using TicketsService.Database.Repositories;
+using TicketsService.Database.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,7 @@ builder.Services.AddDbContext<TicketsContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddTransient<IRepository<Ticket>, TicketRepository>();
+builder.Services.AddTransient<ITicketRepository, TicketRepository>();
 
 var app = builder.Build();
 
