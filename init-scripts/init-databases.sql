@@ -1,7 +1,0 @@
-CREATE DATABASE flight_db;
-CREATE DATABASE tickets_db;
-CREATE DATABASE bonuses_db;
-       
-GRANT ALL PRIVILEGES ON DATABASE flight_db TO postgres;
-GRANT ALL PRIVILEGES ON DATABASE tickets_db TO postgres;
-GRANT ALL PRIVILEGES ON DATABASE bonuses_db TO postgres;

@@ -30,7 +30,7 @@ services:
     container_name: flight-service
     environment:
       - ASPNETCORE_HTTP_PORTS=8060
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=flightsDb;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=flights;Username=postgres;Password=postgres
     ports:
       - "8060:8060"
     depends_on:
@@ -46,7 +46,7 @@ services:
     container_name: tickets-service
     environment:
       - ASPNETCORE_HTTP_PORTS=8070
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=ticketsDb;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=tickets;Username=postgres;Password=postgres
     ports:
       - "8070:8070"
     depends_on:
@@ -62,7 +62,7 @@ services:
     container_name: bonus-service
     environment:
       - ASPNETCORE_HTTP_PORTS=8050
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=bonusesDb;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=privileges;Username=postgres;Password=postgres
     ports:
       - "8050:8050"
     depends_on:

@@ -7,18 +7,44 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-
-builder.Services.AddTransient<IRepository<Airport>, AirportRepository>();
-builder.Services.AddTransient<IRepository<Flight>, FlightRepository>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<FlightContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-var app = builder.Build();
+builder.Services.AddTransient<IRepository<Airport>, AirportRepository>();
+builder.Services.AddTransient<IRepository<Flight>, FlightRepository>();
 
-app.UseRouting();
+var app = builder.Build();
+var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+var context = services.GetRequiredService<FlightContext>();
+var pendingMigrations = context.Database.GetPendingMigrations().ToList();
+if (pendingMigrations.Any())
+{
+    Console.WriteLine($"Applying {pendingMigrations.Count} migrations...");
+    context.Database.Migrate();
+    Console.WriteLine("Migrations applied successfully");
+}
+else
+{
+    Console.WriteLine("Database is up-to-date");
+}
+
+// var initDatabaseJob = services.GetRequiredService<InitializeDatabaseJob>();
+// await initDatabaseJob.InitializeDatabaseAsync();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
