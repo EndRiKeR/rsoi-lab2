@@ -103,6 +103,7 @@ namespace TicketsService.Controllers
         {
             try
             {
+                
                 if (!Request.Headers.TryGetValue("X-User-Name", out var username))
                 {
                     return BadRequest(new ErrorResponse { Message = "X-User-Name header is required" });
