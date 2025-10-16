@@ -14,17 +14,10 @@ namespace TicketsService.Controllers
     public class TicketsController : ControllerBase
     {
         private readonly ITicketRepository _ticketRepository;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<TicketsController> _logger;
         
-        public TicketsController(
-            ITicketRepository ticketRepository,
-            IHttpClientFactory httpClientFactory,
-            ILogger<TicketsController> logger)
+        public TicketsController(ITicketRepository ticketRepository)
         {
             _ticketRepository = ticketRepository;
-            _httpClientFactory = httpClientFactory;
-            _logger = logger;
         }
         
         [HttpGet]
@@ -55,7 +48,6 @@ namespace TicketsService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting user tickets");
                 return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
             }
         }
@@ -93,8 +85,7 @@ namespace TicketsService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting ticket");
-                return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
+                return StatusCode(500, new ErrorResponse { Message = $"GetTicket : {ex.Message}" });
             }
         }
         
@@ -145,8 +136,7 @@ namespace TicketsService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error buying ticket");
-                return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
+                return StatusCode(500, new ErrorResponse { Message = $"BuyTicket : {ex}" });
             }
         }
         
@@ -178,7 +168,6 @@ namespace TicketsService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error returning ticket");
                 return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
             }
         }
@@ -190,7 +179,8 @@ namespace TicketsService.Controllers
                 return (0, ticketPrice);
             }
             
-            var bonusClient = _httpClientFactory.CreateClient("BonusService");
+            var bonusClient = new HttpClient();
+            bonusClient.BaseAddress = new Uri("http://gateway-service:8080/");
             var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/privilege");
             request.Headers.Add("X-User-Name", username);
             
@@ -215,7 +205,8 @@ namespace TicketsService.Controllers
         
         private async Task<PrivilegeShortInfo> UpdateBonusBalance(string username, Guid ticketUid, int paidByBonuses, int paidByMoney, int ticketPrice)
         {
-            var bonusClient = _httpClientFactory.CreateClient("BonusService");
+            var bonusClient = new HttpClient();
+            bonusClient.BaseAddress = new Uri("http://gateway-service:8080/");
             
             if (paidByBonuses > 0)
             {
@@ -275,7 +266,8 @@ namespace TicketsService.Controllers
         
         private async Task ReturnBonusBalance(string username, Guid ticketUid)
         {
-            var bonusClient = _httpClientFactory.CreateClient("BonusService");
+            var bonusClient = new HttpClient();
+            bonusClient.BaseAddress = new Uri("http://gateway-service:8080/");
             
             var historyRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/privilege");
             historyRequest.Headers.Add("X-User-Name", username);
