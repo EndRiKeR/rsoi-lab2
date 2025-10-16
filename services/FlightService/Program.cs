@@ -19,7 +19,7 @@ builder.Services.AddDbContext<FlightContext>(options =>
 builder.Services.AddTransient<IAirportRepository, AirportRepository>();
 builder.Services.AddTransient<IFlightRepository, FlightRepository>();
 
-builder.Services.AddScoped<DatabaseFiller>();
+// builder.Services.AddScoped<DatabaseFiller>();
 
 var app = builder.Build();
 var scope = app.Services.CreateScope();
@@ -37,10 +37,10 @@ else
     Console.WriteLine("Database is up-to-date");
 }
 
-Console.WriteLine($"[*][*][*]Before test data");
-var filler = services.GetRequiredService<DatabaseFiller>();
-await filler.AddTestData();
-Console.WriteLine($"[*][*][*]After test data");
+// Console.WriteLine($"[*][*][*]Before test data");
+// var filler = services.GetRequiredService<DatabaseFiller>();
+// await filler.AddTestData();
+// Console.WriteLine($"[*][*][*]After test data");
 
 if (app.Environment.IsDevelopment())
 {
