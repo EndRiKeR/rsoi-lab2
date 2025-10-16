@@ -3,8 +3,6 @@ using FlightService.Database.Repositories;
 using FlightService.Database.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
