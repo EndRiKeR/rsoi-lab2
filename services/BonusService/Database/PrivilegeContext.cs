@@ -6,10 +6,15 @@ namespace BonusService.Database;
 
 public class PrivilegeContext : DbContext
 {
-    public PrivilegeContext(DbContextOptions<PrivilegeContext> options) : base(options) { }
-
     public DbSet<Privilege> Privileges { get; set; }
     public DbSet<PrivilegeHistory> PrivilegeHistories { get; set; }
+    
+    public PrivilegeContext() { }
+    public PrivilegeContext(DbContextOptions<PrivilegeContext> options) : base(options)
+    {
+        Database.EnsureDeleted();
+        Database.EnsureCreated();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

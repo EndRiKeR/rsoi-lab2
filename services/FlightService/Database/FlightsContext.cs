@@ -6,10 +6,15 @@ namespace FlightService.Database;
 
 public class FlightContext : DbContext
 {
-    public FlightContext(DbContextOptions<FlightContext> options) : base(options) { }
-
     public DbSet<Airport> Airports { get; set; }
     public DbSet<Flight> Flights { get; set; }
+    
+    public FlightContext() { }
+    public FlightContext(DbContextOptions<FlightContext> options) : base(options)
+    {
+        Database.EnsureDeleted();
+        Database.EnsureCreated();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -25,17 +25,17 @@ var app = builder.Build();
 var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 var context = services.GetRequiredService<FlightContext>();
-var pendingMigrations = context.Database.GetPendingMigrations().ToList();
-if (pendingMigrations.Any())
-{
-    Console.WriteLine($"Applying {pendingMigrations.Count} migrations...");
-    context.Database.Migrate();
-    Console.WriteLine("Migrations applied successfully");
-}
-else
-{
-    Console.WriteLine("Database is up-to-date");
-}
+// var pendingMigrations = context.Database.GetPendingMigrations().ToList();
+// if (pendingMigrations.Any())
+// {
+//     Console.WriteLine($"Applying {pendingMigrations.Count} migrations...");
+//     context.Database.Migrate();
+//     Console.WriteLine("Migrations applied successfully");
+// }
+// else
+// {
+//     Console.WriteLine("Database is up-to-date");
+// }
 
 Console.WriteLine($"[*][*][*]Before test data");
 var filler = services.GetRequiredService<DatabaseFiller>();

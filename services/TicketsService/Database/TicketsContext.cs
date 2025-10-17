@@ -10,7 +10,11 @@ public class TicketsContext : DbContext
 
     public TicketsContext() { }
 
-    public TicketsContext(DbContextOptions<TicketsContext> dbContextOptions) : base(dbContextOptions) { }
+    public TicketsContext(DbContextOptions<TicketsContext> dbContextOptions) : base(dbContextOptions)
+    {
+        Database.EnsureDeleted();
+        Database.EnsureCreated();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
