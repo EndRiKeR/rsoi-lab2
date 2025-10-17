@@ -12,8 +12,8 @@ using TicketsService.Database;
 namespace TicketsService.Migrations
 {
     [DbContext(typeof(TicketsContext))]
-    [Migration("20251016065658_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251017152408_InitialCreate2")]
+    partial class InitialCreate2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

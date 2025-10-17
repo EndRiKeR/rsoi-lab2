@@ -10,11 +10,7 @@ public class PrivilegeContext : DbContext
     public DbSet<PrivilegeHistory> PrivilegeHistories { get; set; }
     
     public PrivilegeContext() { }
-    public PrivilegeContext(DbContextOptions<PrivilegeContext> options) : base(options)
-    {
-        Database.EnsureDeleted();
-        Database.EnsureCreated();
-    }
+    public PrivilegeContext(DbContextOptions<PrivilegeContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

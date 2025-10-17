@@ -10,11 +10,7 @@ public class FlightContext : DbContext
     public DbSet<Flight> Flights { get; set; }
     
     public FlightContext() { }
-    public FlightContext(DbContextOptions<FlightContext> options) : base(options)
-    {
-        Database.EnsureDeleted();
-        Database.EnsureCreated();
-    }
+    public FlightContext(DbContextOptions<FlightContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

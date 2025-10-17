@@ -9,9 +9,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var connectionString = Environment.GetEnvironmentVariable("DOCKER_CONNECT_STRING") 
+                       ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<PrivilegeContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(connectionString);
 });
 
 builder.Services.AddTransient<IPrivilegeRepository, PrivilegeRepository>();
@@ -22,20 +25,17 @@ var app = builder.Build();
 var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 var context = services.GetRequiredService<PrivilegeContext>();
-// var pendingMigrations = context.Database.GetPendingMigrations().ToList();
-// if (pendingMigrations.Any())
-// {
-//     Console.WriteLine($"Applying {pendingMigrations.Count} migrations...");
-//     context.Database.Migrate();
-//     Console.WriteLine("Migrations applied successfully");
-// }
-// else
-// {
-//     Console.WriteLine("Database is up-to-date");
-// }
-
-// var initDatabaseJob = services.GetRequiredService<InitializeDatabaseJob>();
-// await initDatabaseJob.InitializeDatabaseAsync();
+var pendingMigrations = context.Database.GetPendingMigrations().ToList();
+if (pendingMigrations.Any())
+{
+    Console.WriteLine($"Applying {pendingMigrations.Count} migrations...");
+    context.Database.Migrate();
+    Console.WriteLine("Migrations applied successfully");
+}
+else
+{
+    Console.WriteLine("Database is up-to-date");
+}
 
 if (app.Environment.IsDevelopment())
 {
