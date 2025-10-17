@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "services\Common\C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayService", "services\GatewayService\GatewayService.csproj", "{82A4E0C3-2D37-45B7-B107-8560497DAEF5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{6C5B71AF-D6F3-4974-A55E-CB29A42EEFBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniTests", "services\UniTests\UniTests.csproj", "{51F180CF-CFC2-4924-88BF-AE1885240519}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +46,12 @@ Global
 		{82A4E0C3-2D37-45B7-B107-8560497DAEF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82A4E0C3-2D37-45B7-B107-8560497DAEF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82A4E0C3-2D37-45B7-B107-8560497DAEF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51F180CF-CFC2-4924-88BF-AE1885240519}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51F180CF-CFC2-4924-88BF-AE1885240519}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51F180CF-CFC2-4924-88BF-AE1885240519}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51F180CF-CFC2-4924-88BF-AE1885240519}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{51F180CF-CFC2-4924-88BF-AE1885240519} = {6C5B71AF-D6F3-4974-A55E-CB29A42EEFBB}
 	EndGlobalSection
 EndGlobal
