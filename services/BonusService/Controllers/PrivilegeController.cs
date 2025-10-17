@@ -1,6 +1,6 @@
-﻿using BonusService.Database.Models;
+﻿using BonusService.Controllers.ControllerModels;
+using BonusService.Database.Models;
 using BonusService.Database.Repositories.Interfaces;
-using BonusService.Models;
 using Common.DtoModels.BonusServiceDto;
 using Common.DtoModels.ErrorDto;
 using Microsoft.AspNetCore.Mvc;
@@ -74,31 +74,48 @@ namespace BonusService.Controllers
         }
         
         [HttpPost("update-balance")]
-        public async Task<IActionResult> UpdateBalance([FromBody] UpdateBalanceRequest request)
+        public async Task<IActionResult> UpdateBalance([FromBody] UpdateBalanceHistoryRequest historyRequest)
         {
             try
             {
-                if (!Request.Headers.TryGetValue("X-User-Name", out var username))
+                if (!Request.Headers.TryGetValue("X-User-Name", out var usernameValues))
                 {
                     return BadRequest(new ErrorResponse { Message = "X-User-Name header is required" });
                 }
                 
-                var privilege = await _privilegeRepository.GetByUsername(username.ToString());
-                
-                await _privilegeRepository.UpdateBalance(privilege.Id, request.BalanceDiff);
+                var username = usernameValues[0];
+                PrivilegeDto privilege;
+
+                if (await _privilegeRepository.ExistsByUsername(username))
+                {
+                    Console.WriteLine($"exists");
+                    privilege = new PrivilegeDto(await _privilegeRepository.GetByUsername(username));
+                    await _privilegeRepository.UpdateBalance(privilege.Id, historyRequest.BalanceDiff);
+                }
+                else
+                {
+                    Console.WriteLine($"not exists");
+                    privilege = new PrivilegeDto(await _privilegeRepository.Add(new Privilege
+                    {
+                        Id = -1,
+                        Username = username,
+                        Status = "BRONZE",
+                        Balance = 0,
+                    }));
+                }
                 
                 var history = new PrivilegeHistory
                 {
                     PrivilegeId = privilege.Id,
-                    TicketUid = request.TicketUid,
+                    TicketUid = historyRequest.TicketUid,
                     Datetime = DateTime.UtcNow,
-                    BalanceDiff = request.BalanceDiff,
-                    OperationType = request.OperationType
+                    BalanceDiff = historyRequest.BalanceDiff,
+                    OperationType = historyRequest.OperationType
                 };
                 
                 await _privilegeHistoryRepository.Add(history);
                 
-                return Ok(new { message = "Balance updated successfully" });
+                return Ok(privilege);
             }
             catch (Exception ex)
             {

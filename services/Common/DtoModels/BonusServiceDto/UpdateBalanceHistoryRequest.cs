@@ -1,6 +1,6 @@
-namespace TicketsService.Models;
+namespace Common.DtoModels.BonusServiceDto;
 
-public class UpdateBalanceRequest
+public class UpdateBalanceHistoryRequest
 {
     public Guid TicketUid { get; set; }
     public int BalanceDiff { get; set; }

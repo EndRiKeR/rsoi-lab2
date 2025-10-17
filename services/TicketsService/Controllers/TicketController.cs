@@ -7,7 +7,6 @@ using Common.DtoModels.FlightServiceDto;
 using TicketsService.Database.Enums;
 using TicketsService.Database.Models;
 using TicketsService.Database.Repositories.Interfaces;
-using TicketsService.Models;
 
 namespace TicketsService.Controllers
 {
@@ -211,42 +210,24 @@ namespace TicketsService.Controllers
         
         private async Task<PrivilegeShortInfo> UpdateBonusBalance(string username, Guid ticketUid, int paidByBonuses, int paidByMoney, int ticketPrice)
         {
-            if (paidByBonuses > 0)
+            bool isPaidByBonuses = paidByBonuses > 0;
+
+            var bonusAmount = (int)(ticketPrice * 0.1);
+            
+            var debitRequest = new UpdateBalanceHistoryRequest
             {
-                var debitRequest = new UpdateBalanceRequest
-                {
-                    TicketUid = ticketUid,
-                    BalanceDiff = -paidByBonuses,
-                    OperationType = "DEBIT_THE_ACCOUNT"
-                };
-                
-                var debitHttpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/v1/privilege/update-balance")
-                {
-                    Content = JsonContent.Create(debitRequest)
-                };
-                debitHttpRequest.Headers.Add("X-User-Name", username);
-                
-                await _gatewayClient.SendAsync(debitHttpRequest);
-            }
-            else
+                TicketUid = ticketUid,
+                BalanceDiff = isPaidByBonuses ? -paidByBonuses : bonusAmount,
+                OperationType = isPaidByBonuses ? "DEBIT_THE_ACCOUNT" : "FILL_IN_BALANCE"
+            };
+            
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/v1/privilege/update-balance")
             {
-                var bonusAmount = (int)(ticketPrice * 0.1);
-                
-                var fillRequest = new UpdateBalanceRequest
-                {
-                    TicketUid = ticketUid,
-                    BalanceDiff = bonusAmount,
-                    OperationType = "FILL_IN_BALANCE"
-                };
-                
-                var fillHttpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/v1/privilege/update-balance")
-                {
-                    Content = JsonContent.Create(fillRequest)
-                };
-                fillHttpRequest.Headers.Add("X-User-Name", username);
-                
-                await _gatewayClient.SendAsync(fillHttpRequest);
-            }
+                Content = JsonContent.Create(debitRequest)
+            };
+            httpRequest.Headers.Add("X-User-Name", username);
+            
+            await _gatewayClient.SendAsync(httpRequest);
             
             var privilegeRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/privilege");
             privilegeRequest.Headers.Add("X-User-Name", username);
@@ -285,7 +266,7 @@ namespace TicketsService.Controllers
                     
                     if (ticketHistory != null)
                     {
-                        var returnOperation = new UpdateBalanceRequest
+                        var returnOperation = new UpdateBalanceHistoryRequest
                         {
                             TicketUid = ticketUid,
                             BalanceDiff = -ticketHistory.BalanceDiff,

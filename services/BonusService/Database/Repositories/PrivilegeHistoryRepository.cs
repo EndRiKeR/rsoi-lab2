@@ -53,13 +53,16 @@ public class PrivilegeHistoryRepository : IPrivilegeHistoryRepository
         try
         {
             var exists = await _context.PrivilegeHistories.AnyAsync(ph => ph.Id == privilegeHistory.Id);
-            
+
             if (exists)
-                throw new Exception("PrivilegeHistory already exists");
-            
+            {
+                return await Update(privilegeHistory);
+            }
+
             var newHistory = await _context.PrivilegeHistories.AddAsync(privilegeHistory);
-            await _context.SaveChangesAsync();
             
+            await _context.SaveChangesAsync();
+        
             return newHistory.Entity;
         }
         catch (Exception e)

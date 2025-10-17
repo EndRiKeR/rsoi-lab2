@@ -271,11 +271,22 @@ namespace GatewayService.Controllers
         }
         
         [HttpPost("privilege/update-balance")]
-        public async Task<IActionResult> UpdatePrivilegeInfo()
+        public async Task<IActionResult> UpdatePrivilegeInfo([FromBody] UpdateBalanceHistoryRequest historyRequest)
         {
             try
             {
-                var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/privilege/update-balance");
+                if (!Request.Headers.TryGetValue("X-User-Name", out var usernameValue))
+                {
+                    return BadRequest(new ErrorResponse { Message = "X-User-Name header is required" });
+                }
+                
+                string? username = usernameValue[0];
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/privilege/update-balance")
+                {
+                    Content = JsonContent.Create(historyRequest)
+                };
+                request.Headers.Add("X-User-Name", username);
                 var response = await _privilegeClient.SendAsync(request);
                 
                 if (response.IsSuccessStatusCode)
