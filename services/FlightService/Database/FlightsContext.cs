@@ -6,8 +6,8 @@ namespace FlightService.Database;
 
 public class FlightContext : DbContext
 {
-    public DbSet<Airport> Airports { get; set; }
-    public DbSet<Flight> Flights { get; set; }
+    public virtual DbSet<Airport> Airports { get; set; }
+    public virtual DbSet<Flight> Flights { get; set; }
     
     public FlightContext() { }
     public FlightContext(DbContextOptions<FlightContext> options) : base(options) { }

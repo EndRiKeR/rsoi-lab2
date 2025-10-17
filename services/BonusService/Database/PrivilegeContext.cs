@@ -6,8 +6,8 @@ namespace BonusService.Database;
 
 public class PrivilegeContext : DbContext
 {
-    public DbSet<Privilege> Privileges { get; set; }
-    public DbSet<PrivilegeHistory> PrivilegeHistories { get; set; }
+    public virtual DbSet<Privilege> Privileges { get; set; }
+    public virtual DbSet<PrivilegeHistory> PrivilegeHistories { get; set; }
     
     public PrivilegeContext() { }
     public PrivilegeContext(DbContextOptions<PrivilegeContext> options) : base(options) { }
