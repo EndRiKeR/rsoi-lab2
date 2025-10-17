@@ -10,7 +10,7 @@ public class TicketsConfiguration : IEntityTypeConfiguration<Ticket>
     {
         builder.HasKey(e => e.Id);
 
-        builder.HasIndex(e => e.Uid)
+        builder.HasIndex(e => e.TicketUid)
             .IsUnique();
 
         builder.Property(e => e.Status)
