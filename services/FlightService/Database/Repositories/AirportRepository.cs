@@ -54,8 +54,8 @@ public class AirportRepository : IAirportRepository
                 throw new Exception("Airport already exists");
             
             var newAirport = await _context.Airports.AddAsync(airport);
-            await _context.SaveChangesAsync();
             
+            await _context.SaveChangesAsync();
             return newAirport.Entity;
         }
         catch (Exception e)
@@ -117,13 +117,11 @@ public class AirportRepository : IAirportRepository
             if (existingAirport == null)
                 throw new Exception($"Airport with id {airport.Id} not found");
 
-            // Обновляем свойства
             existingAirport.Name = airport.Name;
             existingAirport.City = airport.City;
             existingAirport.Country = airport.Country;
 
             await _context.SaveChangesAsync();
-            
             return existingAirport;
         }
         catch (Exception e)

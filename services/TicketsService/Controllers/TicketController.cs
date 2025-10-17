@@ -3,9 +3,11 @@ using Common.DtoModels.ErrorDto;
 using Common.DtoModels.TicketsServiceDto;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Common.DtoModels.FlightServiceDto;
 using TicketsService.Database.Enums;
 using TicketsService.Database.Models;
 using TicketsService.Database.Repositories.Interfaces;
+using TicketsService.Models;
 
 namespace TicketsService.Controllers
 {
@@ -14,10 +16,12 @@ namespace TicketsService.Controllers
     public class TicketsController : ControllerBase
     {
         private readonly ITicketRepository _ticketRepository;
+        private readonly HttpClient _gatewayClient;
         
-        public TicketsController(ITicketRepository ticketRepository)
+        public TicketsController(ITicketRepository ticketRepository, IHttpClientFactory httpClientFactory)
         {
             _ticketRepository = ticketRepository;
+            _gatewayClient = httpClientFactory.CreateClient("Gateway");
         }
         
         [HttpGet]
@@ -25,30 +29,36 @@ namespace TicketsService.Controllers
         {
             try
             {
-                if (!Request.Headers.TryGetValue("X-User-Name", out var username))
+                if (!Request.Headers.TryGetValue("X-User-Name", out var usernameValues))
                 {
                     return BadRequest(new ErrorResponse { Message = "X-User-Name header is required" });
                 }
                 
+                var username = usernameValues[0];
                 var allTickets = await _ticketRepository.GetAll();
-                var userTickets = allTickets.Where(t => t.Username == username.ToString()).ToList();
-                
-                var ticketResponses = userTickets.Select(t => new TicketResponse
+                var userTickets = allTickets.Where(t => t.Username == username).ToList();
+
+                List<TicketResponse> ticketResponses = new();
+                foreach (var userTicket in userTickets)
                 {
-                    TicketUid = t.TicketUid,
-                    FlightNumber = t.FlightNumber,
-                    FromAirport = "Unknown",
-                    ToAirport = "Unknown", 
-                    Date = DateTime.Now,
-                    Price = t.Price,
-                    Status = t.Status.ToString()
-                }).ToList();
+                    var flightData = await GetFlightByNumber(userTicket.FlightNumber);
+                    ticketResponses.Add(new TicketResponse
+                    {
+                        TicketUid = userTicket.TicketUid,
+                        FlightNumber = userTicket.FlightNumber,
+                        FromAirport = flightData.FromAirport,
+                        ToAirport = flightData.ToAirport,
+                        Date = DateTime.Now,
+                        Price = userTicket.Price,
+                        Status = userTicket.Status.ToString()
+                    });
+                }
                 
                 return Ok(ticketResponses);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
+                return StatusCode(500, new ErrorResponse { Message = ex.Message });
             }
         }
         
@@ -70,12 +80,14 @@ namespace TicketsService.Controllers
                     return NotFound(new ErrorResponse { Message = "Ticket not found" });
                 }
                 
+                var flightData = await GetFlightByNumber(ticket.FlightNumber);
+                
                 var response = new TicketResponse
                 {
                     TicketUid = ticket.TicketUid,
                     FlightNumber = ticket.FlightNumber,
-                    FromAirport = "Unknown",
-                    ToAirport = "Unknown",
+                    FromAirport = flightData.FromAirport,
+                    ToAirport = flightData.ToAirport,
                     Date = DateTime.Now,
                     Price = ticket.Price,
                     Status = ticket.Status.ToString()
@@ -85,7 +97,7 @@ namespace TicketsService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ErrorResponse { Message = $"GetTicket : {ex.Message}" });
+                return StatusCode(500, new ErrorResponse { Message = ex.Message });
             }
         }
         
@@ -94,7 +106,6 @@ namespace TicketsService.Controllers
         {
             try
             {
-                
                 if (!Request.Headers.TryGetValue("X-User-Name", out var username))
                 {
                     return BadRequest(new ErrorResponse { Message = "X-User-Name header is required" });
@@ -118,12 +129,14 @@ namespace TicketsService.Controllers
                 
                 var privilegeInfo = await UpdateBonusBalance(usernameValue, ticketUid, paidByBonuses, paidByMoney, request.Price);
                 
+                var flightData = await GetFlightByNumber(request.FlightNumber);
+                
                 var response = new TicketPurchaseResponse
                 {
                     TicketUid = createdTicket.TicketUid,
                     FlightNumber = createdTicket.FlightNumber,
-                    FromAirport = "Unknown",
-                    ToAirport = "Unknown", 
+                    FromAirport = flightData.FromAirport,
+                    ToAirport = flightData.ToAirport, 
                     Date = DateTime.Now,
                     Price = createdTicket.Price,
                     PaidByMoney = paidByMoney,
@@ -136,7 +149,7 @@ namespace TicketsService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ErrorResponse { Message = $"BuyTicket : {ex}" });
+                return StatusCode(500, new ErrorResponse { Message = ex.Message });
             }
         }
         
@@ -146,29 +159,24 @@ namespace TicketsService.Controllers
             try
             {
                 if (!Request.Headers.TryGetValue("X-User-Name", out var username))
-                {
                     return BadRequest(new ErrorResponse { Message = "X-User-Name header is required" });
-                }
                 
                 var usernameValue = username.ToString();
                 var allTickets = await _ticketRepository.GetAll();
                 var ticket = allTickets.FirstOrDefault(t => t.TicketUid == ticketUid && t.Username == usernameValue);
                 
                 if (ticket == null)
-                {
                     return NotFound(new ErrorResponse { Message = "Ticket not found" });
-                }
                 
                 ticket.Status = TicketStatusConverter.ToStatus("CANCELED");
                 await _ticketRepository.Update(ticket);
-                
                 await ReturnBonusBalance(usernameValue, ticketUid);
                 
                 return NoContent();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
+                return StatusCode(500, new ErrorResponse { Message = ex.Message });
             }
         }
         
@@ -179,12 +187,10 @@ namespace TicketsService.Controllers
                 return (0, ticketPrice);
             }
             
-            var bonusClient = new HttpClient();
-            bonusClient.BaseAddress = new Uri("http://gateway-service:8080/");
             var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/privilege");
             request.Headers.Add("X-User-Name", username);
             
-            var response = await bonusClient.SendAsync(request);
+            var response = await _gatewayClient.SendAsync(request);
             
             if (response.IsSuccessStatusCode)
             {
@@ -205,9 +211,6 @@ namespace TicketsService.Controllers
         
         private async Task<PrivilegeShortInfo> UpdateBonusBalance(string username, Guid ticketUid, int paidByBonuses, int paidByMoney, int ticketPrice)
         {
-            var bonusClient = new HttpClient();
-            bonusClient.BaseAddress = new Uri("http://gateway-service:8080/");
-            
             if (paidByBonuses > 0)
             {
                 var debitRequest = new UpdateBalanceRequest
@@ -223,7 +226,7 @@ namespace TicketsService.Controllers
                 };
                 debitHttpRequest.Headers.Add("X-User-Name", username);
                 
-                await bonusClient.SendAsync(debitHttpRequest);
+                await _gatewayClient.SendAsync(debitHttpRequest);
             }
             else
             {
@@ -242,13 +245,13 @@ namespace TicketsService.Controllers
                 };
                 fillHttpRequest.Headers.Add("X-User-Name", username);
                 
-                await bonusClient.SendAsync(fillHttpRequest);
+                await _gatewayClient.SendAsync(fillHttpRequest);
             }
             
             var privilegeRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/privilege");
             privilegeRequest.Headers.Add("X-User-Name", username);
             
-            var privilegeResponse = await bonusClient.SendAsync(privilegeRequest);
+            var privilegeResponse = await _gatewayClient.SendAsync(privilegeRequest);
             if (privilegeResponse.IsSuccessStatusCode)
             {
                 var content = await privilegeResponse.Content.ReadAsStringAsync();
@@ -266,13 +269,10 @@ namespace TicketsService.Controllers
         
         private async Task ReturnBonusBalance(string username, Guid ticketUid)
         {
-            var bonusClient = new HttpClient();
-            bonusClient.BaseAddress = new Uri("http://gateway-service:8080/");
-            
             var historyRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/privilege");
             historyRequest.Headers.Add("X-User-Name", username);
             
-            var historyResponse = await bonusClient.SendAsync(historyRequest);
+            var historyResponse = await _gatewayClient.SendAsync(historyRequest);
             if (historyResponse.IsSuccessStatusCode)
             {
                 var content = await historyResponse.Content.ReadAsStringAsync();
@@ -300,17 +300,29 @@ namespace TicketsService.Controllers
                         };
                         returnRequest.Headers.Add("X-User-Name", username);
                         
-                        await bonusClient.SendAsync(returnRequest);
+                        await _gatewayClient.SendAsync(returnRequest);
                     }
                 }
             }
         }
-    }
-    
-    public class UpdateBalanceRequest
-    {
-        public Guid TicketUid { get; set; }
-        public int BalanceDiff { get; set; }
-        public string OperationType { get; set; } = string.Empty;
+        
+        private async Task<FlightResponse> GetFlightByNumber(string flightNumber)
+        {
+            var flightRequest = new HttpRequestMessage(HttpMethod.Get, $"http://gateway-service:8080/api/v1/flights/{flightNumber}");
+            var flightResponse = await _gatewayClient.SendAsync(flightRequest);
+
+            if (!flightResponse.IsSuccessStatusCode)
+            {
+                Console.WriteLine(flightResponse.StatusCode);
+                return null;
+            }
+            
+            var content = await flightResponse.Content.ReadAsStringAsync();
+            var privilegeInfo = JsonSerializer.Deserialize<FlightResponse>(content);
+            
+            Console.WriteLine(content);
+                
+            return privilegeInfo;
+        }
     }
 }

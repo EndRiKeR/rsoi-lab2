@@ -7,12 +7,10 @@ namespace GatewayService.Controllers
     public class HealthController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<HealthController> _logger;
 
-        public HealthController(IHttpClientFactory httpClientFactory, ILogger<HealthController> logger)
+        public HealthController(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-            _logger = logger;
         }
 
         [HttpGet("health")]
@@ -50,7 +48,6 @@ namespace GatewayService.Controllers
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Health check failed for {Service}", service.Name);
                         healthResults.Add(new
                         {
                             service = service.Name,
@@ -72,7 +69,6 @@ namespace GatewayService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Health check failed");
                 return StatusCode(503, new
                 {
                     status = "Unhealthy",

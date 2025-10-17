@@ -1,5 +1,6 @@
 ﻿using BonusService.Database.Models;
 using BonusService.Database.Repositories.Interfaces;
+using BonusService.Models;
 using Common.DtoModels.BonusServiceDto;
 using Common.DtoModels.ErrorDto;
 using Microsoft.AspNetCore.Mvc;
@@ -12,16 +13,13 @@ namespace BonusService.Controllers
     {
         private readonly IPrivilegeRepository _privilegeRepository;
         private readonly IPrivilegeHistoryRepository _privilegeHistoryRepository;
-        private readonly ILogger<PrivilegeController> _logger;
         
         public PrivilegeController(
             IPrivilegeRepository privilegeRepository,
-            IPrivilegeHistoryRepository privilegeHistoryRepository,
-            ILogger<PrivilegeController> logger)
+            IPrivilegeHistoryRepository privilegeHistoryRepository)
         {
             _privilegeRepository = privilegeRepository;
             _privilegeHistoryRepository = privilegeHistoryRepository;
-            _logger = logger;
         }
         
         [HttpGet]
@@ -71,8 +69,7 @@ namespace BonusService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting privilege info");
-                return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
+                return StatusCode(500, new ErrorResponse { Message = ex.Message });
             }
         }
         
@@ -105,16 +102,8 @@ namespace BonusService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating balance");
-                return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
+                return StatusCode(500, new ErrorResponse { Message = ex.Message });
             }
         }
-    }
-    
-    public class UpdateBalanceRequest
-    {
-        public Guid TicketUid { get; set; }
-        public int BalanceDiff { get; set; }
-        public string OperationType { get; set; } = string.Empty;
     }
 }

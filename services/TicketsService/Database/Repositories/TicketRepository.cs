@@ -17,9 +17,7 @@ public class TicketRepository : ITicketRepository
     {
         try
         {
-            List<Ticket> tickets = await _context.Tickets.ToListAsync();
-            
-            return tickets;
+            return await _context.Tickets.ToListAsync();
         }
         catch (Exception e)
         {
@@ -32,10 +30,30 @@ public class TicketRepository : ITicketRepository
     {
         try
         {
-            List<Ticket> tickets = await _context.Tickets.ToListAsync();
-            Ticket target = tickets.First(t => t.Id == id);
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
             
-            return target;
+            if (ticket == null)
+                throw new Exception($"Ticket with id {id} not found");
+            
+            return ticket;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<Ticket> GetByTicketUid(Guid ticketUid)
+    {
+        try
+        {
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.TicketUid == ticketUid);
+            
+            if (ticket == null)
+                throw new Exception($"Ticket with UID {ticketUid} not found");
+            
+            return ticket;
         }
         catch (Exception e)
         {
@@ -48,13 +66,14 @@ public class TicketRepository : ITicketRepository
     {
         try
         {
-            List<Ticket> tickets = await _context.Tickets.ToListAsync();
-            Ticket target = tickets.FirstOrDefault(t => t.Id == ticket.Id);
+            var existingTicket = await _context.Tickets
+                .FirstOrDefaultAsync(t => t.TicketUid == ticket.TicketUid);
             
-            if (target != null)
-                throw new Exception("Ticket already exists");
-            
+            if (existingTicket != null)
+                throw new Exception($"Ticket with UID {ticket.TicketUid} already exists");
+
             var newTicket = await _context.Tickets.AddAsync(ticket);
+            await _context.SaveChangesAsync();
             
             return newTicket.Entity;
         }
@@ -69,20 +88,19 @@ public class TicketRepository : ITicketRepository
     {
         try
         {
-            List<Ticket> tickets = await _context.Tickets.ToListAsync();
-            List<Ticket> returnTickets = new List<Ticket>();
+            var ticketUids = addTickets.Select(t => t.TicketUid).ToList();
+            var existingTickets = await _context.Tickets
+                .Where(t => ticketUids.Contains(t.TicketUid))
+                .Select(t => t.TicketUid)
+                .ToListAsync();
 
-            foreach (var ticket in addTickets)
-            {
-                Ticket target = tickets.FirstOrDefault(t => t.Id == ticket.Id);
+            if (existingTickets.Any())
+                throw new Exception($"Tickets with UIDs {string.Join(", ", existingTickets)} already exist");
+
+            await _context.Tickets.AddRangeAsync(addTickets);
+            await _context.SaveChangesAsync();
             
-                if (target != null)
-                    throw new Exception("Ticket already exists");
-            
-                returnTickets.Add((await _context.Tickets.AddAsync(ticket)).Entity);
-            }
-            
-            return returnTickets;
+            return addTickets;
         }
         catch (Exception e)
         {
@@ -93,11 +111,65 @@ public class TicketRepository : ITicketRepository
 
     public async Task Delete(long id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
+            
+            if (ticket == null)
+                throw new Exception($"Ticket with id {id} not found");
+            
+            _context.Tickets.Remove(ticket);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task DeleteByTicketUid(Guid ticketUid)
+    {
+        try
+        {
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.TicketUid == ticketUid);
+            
+            if (ticket == null)
+                throw new Exception($"Ticket with UID {ticketUid} not found");
+            
+            _context.Tickets.Remove(ticket);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task<Ticket> Update(Ticket ticket)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var existingTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticket.Id);
+            
+            if (existingTicket == null)
+                throw new Exception($"Ticket with id {ticket.Id} not found");
+
+            existingTicket.Status = ticket.Status;
+            existingTicket.Price = ticket.Price;
+            existingTicket.FlightNumber = ticket.FlightNumber;
+            existingTicket.Username = ticket.Username;
+            existingTicket.TicketUid = ticket.TicketUid;
+
+            await _context.SaveChangesAsync();
+            
+            return existingTicket;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }

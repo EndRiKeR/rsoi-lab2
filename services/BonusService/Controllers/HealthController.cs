@@ -9,12 +9,10 @@ namespace BonusService.Controllers
     public class HealthController : ControllerBase
     {
         private readonly PrivilegeContext _dbContext;
-        private readonly ILogger<HealthController> _logger;
 
-        public HealthController(PrivilegeContext dbContext, ILogger<HealthController> logger)
+        public HealthController(PrivilegeContext dbContext)
         {
             _dbContext = dbContext;
-            _logger = logger;
         }
 
         [HttpGet("health")]
@@ -26,7 +24,6 @@ namespace BonusService.Controllers
                 
                 if (!canConnect)
                 {
-                    _logger.LogWarning("Database connection check failed");
                     return StatusCode(503, new
                     {
                         status = "Unhealthy",
@@ -54,7 +51,6 @@ namespace BonusService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Health check failed");
                 return StatusCode(503, new
                 {
                     status = "Unhealthy",

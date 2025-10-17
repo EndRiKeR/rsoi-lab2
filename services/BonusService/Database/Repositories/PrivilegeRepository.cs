@@ -121,7 +121,6 @@ public class PrivilegeRepository : IPrivilegeRepository
             if (existingPrivilege == null)
                 throw new Exception($"Privilege with id {privilege.Id} not found");
 
-            // Обновляем свойства
             existingPrivilege.Username = privilege.Username;
             existingPrivilege.Status = privilege.Status;
             existingPrivilege.Balance = privilege.Balance;
@@ -137,7 +136,6 @@ public class PrivilegeRepository : IPrivilegeRepository
         }
     }
 
-    // Дополнительные методы для работы с привилегиями
     public async Task<Privilege> GetByUsername(string username)
     {
         try

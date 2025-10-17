@@ -12,13 +12,11 @@ namespace FlightService.Controllers
     {
         private readonly IFlightRepository _flightRepository;
         private readonly IAirportRepository _airportRepository;
-        private readonly ILogger<FlightsController> _logger;
         
-        public FlightsController(IFlightRepository flightRepository, IAirportRepository airportRepository, ILogger<FlightsController> logger)
+        public FlightsController(IFlightRepository flightRepository, IAirportRepository airportRepository)
         {
             _flightRepository = flightRepository;
             _airportRepository = airportRepository;
-            _logger = logger;
         }
         
         [HttpGet]
@@ -74,13 +72,12 @@ namespace FlightService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting flights");
-                return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
+                return StatusCode(500, new ErrorResponse { Message = ex.Message });
             }
         }
         
         [HttpGet("{flightNumber}")]
-        public async Task<IActionResult> GetFlightByNumber(string flightNumber)
+        public async Task<IActionResult> GetFlightByNumber([FromRoute] string flightNumber)
         {
             try
             {
@@ -120,8 +117,7 @@ namespace FlightService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting flight by number");
-                return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
+                return StatusCode(500, new ErrorResponse { Message = ex.Message });
             }
         }
         
@@ -156,8 +152,7 @@ namespace FlightService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error filling database");
-                return StatusCode(500, new ErrorResponse { Message = "Internal server error" });
+                return StatusCode(500, new ErrorResponse { Message = ex.Message });
             }
         }
     }

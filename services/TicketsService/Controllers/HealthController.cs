@@ -9,12 +9,10 @@ namespace TicketsService.Controllers
     public class HealthController : ControllerBase
     {
         private readonly TicketsContext _dbContext;
-        private readonly ILogger<HealthController> _logger;
 
-        public HealthController(TicketsContext dbContext, ILogger<HealthController> logger)
+        public HealthController(TicketsContext dbContext)
         {
             _dbContext = dbContext;
-            _logger = logger;
         }
 
         [HttpGet("health")]
@@ -26,7 +24,6 @@ namespace TicketsService.Controllers
                 
                 if (!canConnect)
                 {
-                    _logger.LogWarning("Database connection check failed");
                     return StatusCode(503, new
                     {
                         status = "Unhealthy",
@@ -54,7 +51,6 @@ namespace TicketsService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Health check failed");
                 return StatusCode(503, new
                 {
                     status = "Unhealthy",

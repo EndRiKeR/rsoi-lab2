@@ -9,6 +9,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHttpClient("Gateway", client =>
+{
+    client.BaseAddress = new Uri("http://gateway-service:8080");
+});
+
 var connectionString = Environment.GetEnvironmentVariable("DOCKER_CONNECT_STRING") 
                        ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -49,7 +54,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 

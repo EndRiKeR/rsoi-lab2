@@ -121,7 +121,6 @@ public class PrivilegeHistoryRepository : IPrivilegeHistoryRepository
             if (existingHistory == null)
                 throw new Exception($"PrivilegeHistory with id {privilegeHistory.Id} not found");
 
-            // Обновляем свойства
             existingHistory.PrivilegeId = privilegeHistory.PrivilegeId;
             existingHistory.TicketUid = privilegeHistory.TicketUid;
             existingHistory.Datetime = privilegeHistory.Datetime;
@@ -139,7 +138,6 @@ public class PrivilegeHistoryRepository : IPrivilegeHistoryRepository
         }
     }
 
-    // Дополнительные методы для работы с историей привилегий
     public async Task<List<PrivilegeHistory>> GetByPrivilegeId(long privilegeId)
     {
         try
