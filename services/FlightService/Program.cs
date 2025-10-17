@@ -14,7 +14,7 @@ builder.Services.AddDbContext<FlightContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-Console.WriteLine($"Connection string: {builder.Configuration.GetConnectionString("DefaultConnection")}");
+Console.WriteLine($"Connection string: {builder.Configuration.GetSection("DefaultConnection")}");
 
 builder.Services.AddTransient<IAirportRepository, AirportRepository>();
 builder.Services.AddTransient<IFlightRepository, FlightRepository>();

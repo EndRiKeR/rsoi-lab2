@@ -35,7 +35,7 @@ namespace TicketsService.Controllers
                 
                 var ticketResponses = userTickets.Select(t => new TicketResponse
                 {
-                    TicketUid = t.TicketUid,
+                    TicketUid = t.Uid,
                     FlightNumber = t.FlightNumber,
                     FromAirport = "Unknown",
                     ToAirport = "Unknown", 
@@ -63,7 +63,7 @@ namespace TicketsService.Controllers
                 }
                 
                 var allTickets = await _ticketRepository.GetAll();
-                var ticket = allTickets.FirstOrDefault(t => t.TicketUid == ticketUid && t.Username == username.ToString());
+                var ticket = allTickets.FirstOrDefault(t => t.Uid == ticketUid && t.Username == username.ToString());
                 
                 if (ticket == null)
                 {
@@ -72,7 +72,7 @@ namespace TicketsService.Controllers
                 
                 var response = new TicketResponse
                 {
-                    TicketUid = ticket.TicketUid,
+                    TicketUid = ticket.Uid,
                     FlightNumber = ticket.FlightNumber,
                     FromAirport = "Unknown",
                     ToAirport = "Unknown",
@@ -107,7 +107,7 @@ namespace TicketsService.Controllers
                 
                 var ticket = new Ticket
                 {
-                    TicketUid = ticketUid,
+                    Uid = ticketUid,
                     Username = usernameValue,
                     FlightNumber = request.FlightNumber,
                     Price = request.Price,
@@ -120,7 +120,7 @@ namespace TicketsService.Controllers
                 
                 var response = new TicketPurchaseResponse
                 {
-                    TicketUid = createdTicket.TicketUid,
+                    TicketUid = createdTicket.Uid,
                     FlightNumber = createdTicket.FlightNumber,
                     FromAirport = "Unknown",
                     ToAirport = "Unknown", 
@@ -152,7 +152,7 @@ namespace TicketsService.Controllers
                 
                 var usernameValue = username.ToString();
                 var allTickets = await _ticketRepository.GetAll();
-                var ticket = allTickets.FirstOrDefault(t => t.TicketUid == ticketUid && t.Username == usernameValue);
+                var ticket = allTickets.FirstOrDefault(t => t.Uid == ticketUid && t.Username == usernameValue);
                 
                 if (ticket == null)
                 {

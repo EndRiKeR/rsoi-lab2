@@ -26,7 +26,7 @@ public class FlightsConfiguration : IEntityTypeConfiguration<Flight>
         builder.HasOne(f => f.FromAirport)
             .WithMany(a => a.DepartureFlights)
             .HasForeignKey(f => f.FromAirportId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict); 
 
         builder.HasOne(f => f.ToAirport)
             .WithMany(a => a.ArrivalFlights)
